@@ -105,21 +105,21 @@ int AS5134::transmit(int command, bool sendMode, int data = 0) {
     digitalWrite(csPin,LOW);
     digitalWrite(clkPin,LOW);
     digitalWrite(csPin,HIGH);
-    delay(1);
+    delayMicroseconds(1);
 
     //send the command
     pinMode(dioPin, OUTPUT);
     for(int bitNum = 4; bitNum >= 0; bitNum--) {
         //tick clock low
         digitalWrite(clkPin,LOW);
-        delay(1);
+        delayMicroseconds(1);
 
         //send the bit
         digitalWrite(dioPin, ((command >> bitNum) & 1));
 
         //tick clock high
         digitalWrite(clkPin,HIGH);
-        delay(1);
+        delayMicroseconds(1);
     }
 
     //read/write the data
@@ -129,7 +129,7 @@ int AS5134::transmit(int command, bool sendMode, int data = 0) {
     for(int bitNum=15; bitNum >= 0; bitNum--) {
         //tick the clock LOW
         digitalWrite(clkPin,LOW);
-        delay(1);
+        delayMicroseconds(1);
         
         //send the bit if in send mode
         if (sendMode) {
@@ -138,7 +138,7 @@ int AS5134::transmit(int command, bool sendMode, int data = 0) {
         
         //tick the clock HIGH
         digitalWrite(clkPin,HIGH);
-        delay(1);
+        delayMicroseconds(1);
 
         //Add the bit to the response if in read mode
         if (!sendMode) {
