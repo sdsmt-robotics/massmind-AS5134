@@ -1,3 +1,16 @@
+/* 1/10/2020
+ * Samuel Ryckman
+ * 
+ * Massmind AS5134 rotary encoder class.
+ * This class provides functions for interfacing with the encoder using 3 pin serial mode.
+ * 
+ * AS5134(dioPin, csPin, clkPin) - constructor. Provide the IO pin nums for communications.
+ * init() - initialize the communications pins. Call in the Arduino setup() function.
+ * readCounter() - read the multi-turn counter.
+ * resetCounter() - reset the multi-turn counter to zero.
+ * readAngle() - get the absolute angle value.
+ * readMultiTurnAngle() - get the total angle value from the starting position.
+ */
 #include "AS5134.h"
 
 //Define some commands
