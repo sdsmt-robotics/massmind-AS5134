@@ -47,7 +47,7 @@ void AS5134::init() {
 * @return the number of complete rotations.
 */
 int AS5134::readCounter() {
-    return transmit(RD_COUNTER) >> 7;
+    return getData(RD_COUNTER) >> 7;
 }
 
 
@@ -55,7 +55,7 @@ int AS5134::readCounter() {
 * Reset the multi-turn counter to 0.
 */
 void AS5134::resetCounter() {
-    transmit(SET_COUNTER, 0);
+    setData(SET_COUNTER, 0);
 }
 
 
@@ -67,7 +67,7 @@ void AS5134::resetCounter() {
 int AS5134::readAngle() {
     const int ANGLE_MASK = 0b111111111;
     
-    return transmit(RD_ANGLE) & ANGLE_MASK;
+    return getData(RD_ANGLE) & ANGLE_MASK;
 }
 
 
@@ -83,6 +83,23 @@ long AS5134::readMultiTurnAngle() {
     return (long)turns * 360 + angle;
 }
 
+/**
+* Put the encoder to sleep. Angle value will be locked until taken out of sleep mode.
+* 
+* @param enable - Set whether sleep mode is on or off.
+*/
+void AS5134::setLowPowerMode(bool enable = true) {
+    setData(WRITE_CONFIG, uint16_t(enable) << 15);
+}
+
+/**
+* Status of the angle tracking ADC. Check whether it is locked on the magnet angle.
+* 
+* @return the status of the lock.
+*/
+bool AS5134::getLockAdc() {
+    return getData(RD_ANGLE) >> 15;
+}
 
 /**
 * Data transmission with the encoder for reading data
@@ -90,7 +107,7 @@ long AS5134::readMultiTurnAngle() {
 * @param command - Data transmission command.
 * @return the data received.
 */
-int AS5134::transmit(int command) {
+uint16_t AS5134::getData(int command) {
     return transmit(command, false);
 }
 
@@ -100,7 +117,7 @@ int AS5134::transmit(int command) {
 * @param command - Data transmission command.
 * @param data - Data to send to the encoder.
 */
-void AS5134::transmit(int command, int data) {
+void AS5134::setData(int command, uint16_t data) {
     transmit(command, true, data);
 }
 
@@ -112,7 +129,7 @@ void AS5134::transmit(int command, int data) {
 * @param data - Data to send to the encoder.
 * @return the data received if in read mode.
 */
-int AS5134::transmit(int command, bool sendMode, int data = 0) {
+uint16_t AS5134::transmit(int command, bool sendMode, uint16_t data = 0) {
     
     // Start the transmission
     digitalWrite(csPin,LOW);
@@ -146,7 +163,7 @@ int AS5134::transmit(int command, bool sendMode, int data = 0) {
         
         //send the bit if in send mode
         if (sendMode) {
-            digitalWrite(dioPin, ((command >> bitNum) & 1));
+            digitalWrite(dioPin, ((data >> bitNum) & 1));
         }
         
         //tick the clock HIGH
