@@ -77,10 +77,19 @@ int AS5134::readAngle() {
 * @return the total angle value.
 */
 long AS5134::readMultiTurnAngle() {
-    int turns = readCounter();
+    //Read the values. Read turns twice to make sure we didn't loop over.
+    int turns1 = readCounter();
     int angle = readAngle();
+    int turns2 = readCounter();
     
-    return (long)turns * 360 + angle;
+    //If we looped around between reading turns1 and angle, have to use second turn count and re-read angle
+    //This is rare, but does happen sometimes.
+    if (turns1 != turns2) {
+        angle = readAngle();
+        turns2 = readCounter();  //re-read this just for timing consistancy
+    }
+    
+    return (long)turns2 * 360 + angle;
 }
 
 /**
@@ -130,6 +139,8 @@ void AS5134::setData(int command, uint16_t data) {
 * @return the data received if in read mode.
 */
 uint16_t AS5134::transmit(int command, bool sendMode, uint16_t data = 0) {
+    //NOTE: Delays have been removed from this. Max clock frequency of the encoder is 6MHZ. 
+    // Might need to slow this down if there are problems.
     
     // Start the transmission
     digitalWrite(csPin,LOW);
@@ -142,14 +153,14 @@ uint16_t AS5134::transmit(int command, bool sendMode, uint16_t data = 0) {
     for(int bitNum = 4; bitNum >= 0; bitNum--) {
         //tick clock low
         digitalWrite(clkPin,LOW);
-        delayMicroseconds(1);
+        //delayMicroseconds(1);
 
         //send the bit
         digitalWrite(dioPin, ((command >> bitNum) & 1));
 
         //tick clock high
         digitalWrite(clkPin,HIGH);
-        delayMicroseconds(1);
+        //delayMicroseconds(1);
     }
 
     //read/write the data
@@ -159,7 +170,7 @@ uint16_t AS5134::transmit(int command, bool sendMode, uint16_t data = 0) {
     for(int bitNum=15; bitNum >= 0; bitNum--) {
         //tick the clock LOW
         digitalWrite(clkPin,LOW);
-        delayMicroseconds(1);
+        //delayMicroseconds(1);
         
         //send the bit if in send mode
         if (sendMode) {
@@ -168,7 +179,7 @@ uint16_t AS5134::transmit(int command, bool sendMode, uint16_t data = 0) {
         
         //tick the clock HIGH
         digitalWrite(clkPin,HIGH);
-        delayMicroseconds(1);
+        //delayMicroseconds(1);
 
         //Add the bit to the response if in read mode
         if (!sendMode) {
