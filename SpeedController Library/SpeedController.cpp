@@ -56,6 +56,10 @@ int SpeedController::computeMotorPower(int motorSpeed, int desiredSpeed)
     if (lastTime == 0) {
         lastTime = micros();
         lastError = target - motorSpeed;
+        for(int i = 0; i < 5; i++)
+        {
+          filterMotorSpeed(motorSpeed);
+        }
         return (maxOutput + minOutput) / 2;
     }
 
