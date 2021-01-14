@@ -19,11 +19,13 @@ public:
     void resetCounter();
     int readAngle();
     long readMultiTurnAngle();
+    void setLowPowerMode(bool enable = true);
+    bool getLockAdc();
   
 private:
-    int transmit(int command);
-    void transmit(int command, int data);
-    int transmit(int command, bool sendMode, int data = 0);
+    uint16_t getData(int command);
+    void setData(int command, uint16_t data);
+    uint16_t transmit(int command, bool sendMode, uint16_t data = 0);
     
     int dioPin, csPin, clkPin;
 };
