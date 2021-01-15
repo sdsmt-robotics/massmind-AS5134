@@ -58,12 +58,12 @@ Datasheet: [https://www.mouser.com/datasheet/2/588/AS5134_Datasheet_EN_v4-318114
 
 
 **Wiring:**  
-Make connections to the encoder as follows:
+Make connections to the encoder as follows:  
 dioPin -> Data/SO  
 csPin -> nCS/CS  
-clkPin -> Clock/CK
-5v -> 5v
-gnd -> gnd
+clkPin -> Clock/CK  
+5v -> 5v  
+gnd -> gnd  
 
 Also, the ***Data/SO pin must be pulled low*** for communications to work correctly. To do this, add a 10k resistor between ground and that pin.
 

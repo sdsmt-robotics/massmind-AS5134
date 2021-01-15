@@ -47,7 +47,12 @@ void AS5134::init() {
 * @return the number of complete rotations.
 */
 int AS5134::readCounter() {
-    return getData(RD_COUNTER) >> 7;
+    int numTurns = getData(RD_COUNTER) >> 7;
+    // Turn counter is signed 9-bit val. Sign extend if negative.
+    if (numTurns & 0b100000000) {
+      numTurns |= 0xFE00;
+    }
+    return numTurns;
 }
 
 
@@ -87,11 +92,6 @@ long AS5134::readMultiTurnAngle() {
     if (turns1 != turns2) {
         angle = readAngle();
         turns2 = readCounter();  //re-read this just for timing consistancy
-    }
-
-    if( turns2 > 255)
-    {
-      turns2 -= 512; 
     }
 
     return (long)turns2 * 360 + angle;

@@ -2,7 +2,9 @@
  * Samuel Ryckman
  * 
  * Example of how to use the library.
- * Displays the turn count and current angle. Spacebar resets the turn count.
+ * Displays the turn count and current angle.
+ *  - Spacebar: resets the turn count.
+ *  - 's': toggles sleep mode.
  */
 
 #include "AS5134.h"
@@ -28,7 +30,11 @@ void loop() {
   Serial.print("Turns: ");
   Serial.print(encoder.readCounter());
   Serial.print(", Angle: ");
-  Serial.println(encoder.readAngle());
+  Serial.print(encoder.readAngle());
+  Serial.print(", Sleeping: ");
+  Serial.print(sleeping);
+  Serial.print(", ADC_LOCK: ");
+  Serial.println(encoder.getLockAdc());
 
   
   //Read value from console if we have one
@@ -41,6 +47,9 @@ void loop() {
     if (readVal == ' ') {
       //reset the turn count
       encoder.resetCounter();
+    } else if (readVal == 's') {
+      sleeping = !sleeping;
+      encoder.setLowPowerMode(sleeping);
     }
   }
   
