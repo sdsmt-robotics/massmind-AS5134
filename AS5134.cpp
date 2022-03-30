@@ -126,6 +126,17 @@ uint16_t AS5134::getData(int command) {
 }
 
 /**
+* Data transmission with the encoder for reading data
+* 
+* @param command - Data transmission command.
+* @param length - Length of data to receive
+* @return the data received.
+*/
+uint64_t AS5134::getData(int command,uint8_t length) {
+    return transmitEx(command, false,0,length);
+}
+
+/**
 * Data transmission with the encoder for sending data
 * 
 * @param command - Data transmission command.
@@ -135,7 +146,14 @@ void AS5134::setData(int command, uint16_t data) {
     transmit(command, true, data);
 }
 
-/**
+void AS5134::setData(uint8_t command, uint64_t data,uint8_t len){
+    if (len < 62)
+        transmit(command,true,data);
+    else
+        transmitEx(command,true,data,len);
+}
+
+/**unit32_t
 * Data transmission with the encoder for sending or reading data
 * 
 * @param command - Data transmission command.
@@ -190,6 +208,76 @@ uint16_t AS5134::transmit(int command, bool sendMode, uint16_t data = 0) {
         if (!sendMode) {
             if(digitalRead(dioPin)) {
               data += (1 << (bitNum));
+            }
+        }
+    }
+
+    //End the transmission
+    digitalWrite(clkPin, LOW);
+    digitalWrite(csPin, LOW);
+
+    return data;
+}
+
+/**
+* Data transmission with the encoder for sending or reading data
+* 
+* @param command - Data transmission command.
+* @param sendMode - Set whether we are sending or reading data.
+* @param data - Data to send to the encoder.
+* @param length - Length of Data to send
+* @return the data received if in read mode.
+*/
+uint16_t AS5134::transmitEx(uint8_t command, bool sendMode, uint64_t data=0,uint8_t length = 16) {
+ //NOTE: Delays have been removed from this. Max clock frequency of the encoder is 6MHZ. 
+    // Might need to slow this down if there are problems.
+    
+    // Start the transmission
+    digitalWrite(csPin,LOW);
+    digitalWrite(clkPin,LOW);
+    digitalWrite(csPin,HIGH);
+    delayMicroseconds(1);
+
+    //send the command
+    pinMode(dioPin, OUTPUT);
+    for(int bitNum = 4; bitNum >= 0; bitNum--) {
+        //tick clock low
+        digitalWrite(clkPin,LOW);
+        //delayMicroseconds(1);
+
+        //send the bit
+        digitalWrite(dioPin, ((command >> bitNum) & 1));
+
+        //tick clock high
+        digitalWrite(clkPin,HIGH);
+        //delayMicroseconds(1);
+    }
+
+    //read/write the data
+    if (!sendMode) {
+        pinMode(dioPin, INPUT);
+    }
+    for(int bitNum=length-1; bitNum >= 0; bitNum--) {
+        //tick the clock LOW
+        for(int i=0;i<4;i++)
+        {
+            digitalWrite(clkPin,LOW);
+            //delayMicroseconds(1);
+
+            //send the bit if in send mode
+            if (sendMode) {
+                digitalWrite(dioPin, ((data >> bitNum) & 1));
+            }
+
+            //tick the clock HIGH
+            digitalWrite(clkPin,HIGH);
+            //delayMicroseconds(1);
+
+            //Add the bit to the response if in read mode
+            if (!sendMode) {
+                if(digitalRead(dioPin)) {
+                  data += (1 << (bitNum));
+                }
             }
         }
     }

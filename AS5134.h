@@ -21,12 +21,15 @@ public:
     long readMultiTurnAngle();
     void setLowPowerMode(bool enable = true);
     bool getLockAdc();
+    uint16_t getData(int command);
+
+    uint64_t getData(int command,uint8_t len);
+    void setData(int command, uint16_t data);
+    void setData(uint8_t command, uint64_t data,uint8_t len);
   
 private:
-    uint16_t getData(int command);
-    void setData(int command, uint16_t data);
     uint16_t transmit(int command, bool sendMode, uint16_t data = 0);
-    
+    uint16_t transmitEx(uint8_t command, bool sendMode, uint64_t data, uint8_t length);
     int dioPin, csPin, clkPin;
 };
 
